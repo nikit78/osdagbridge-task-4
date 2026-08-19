@@ -99,4 +99,22 @@ async function login(req, res) {
   }
 }
 
-module.exports = { register, login };
+async function logout(req, res) {
+  try {
+    const sessionId = req.sessionId;
+
+    await pool.query(
+      `UPDATE sessions
+       SET revoked_at = NOW()
+       WHERE id = $1`,
+      [sessionId]
+    );
+
+    return res.status(200).json({ message: 'Logged out successfully' });
+  } catch (err) {
+    console.error('Logout error:', err);
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
+}
+
+module.exports = { register, login, logout };
