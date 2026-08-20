@@ -102,16 +102,17 @@
     }
   }
 
-  async function handleFileDownload(req, fileId) {
+    async function handleFileDownload(req, fileId) {
     try {
       const user = await account.get();
       const doc = await databases.getDocument(DATABASE_ID, FILES_TABLE_ID, fileId);
       if (doc.owner_id !== user.$id) {
         return new Response("Forbidden", { status: 403 });
       }
-      const result = storage.getFileDownload(BUCKET_ID, doc.storage_file_id);
-      return fetch(result);
+      const downloadUrl = storage.getFileDownload(BUCKET_ID, doc.storage_file_id);
+      return realFetch(downloadUrl, { credentials: "include" });
     } catch (err) {
+      console.error("DOWNLOAD ERROR:", err);
       return new Response("DEBUG: " + err.message, { status: 401 });
     }
   }
